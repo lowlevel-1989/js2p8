@@ -4,9 +4,31 @@
 
 When a Pico-8 game is compiled to JavaScript, the generated code includes specific variables containing the cartridge name and the compressed game data. This program reads those compressed data from the generated `.js` file, decompresses it, and reconstructs the original `.p8` file with the correct header so it can be reopened and edited in Pico-8.
 
-
 [!["Buy Me A Coffee"](coffee.png)](https://ko-fi.com/lowlevel1989)
 
+---
+
+## Supported Sections
+
+Currently, `js2p8` only supports the following sections of the `.p8` file:
+
+* `__lua__`
+* `__gfx__`
+* `__map__`
+
+**Other sections such as** `__gff__`, `__sfx__`, `__music__`, and others **are not yet supported.**
+
+---
+
+## References and Formats
+
+To better understand the `.p8` file format, the `.p8.png` cartridge format, and Pico-8 memory layout, you can consult the official Pico-8 documentation and wiki:
+
+* [P8FileFormat](https://pico-8.fandom.com/wiki/P8FileFormat)
+* [P8PNGFileFormat](https://pico-8.fandom.com/wiki/P8PNGFileFormat)
+* [Memory](https://pico-8.fandom.com/wiki/Memory)
+
+These references contain important details about data structure and internal cartridge memory.
 
 ---
 
@@ -14,8 +36,8 @@ When a Pico-8 game is compiled to JavaScript, the generated code includes specif
 
 The JavaScript file passed to `js2p8` must contain at least these global variables:
 
-- `_cartname`: an array containing the `.p8` filename.
-* `_cartdat`:  an array with the compressed game data.
+* `_cartname`: an array containing the `.p8` filename.
+* `_cartdat`: an array with the compressed game data.
 
   ```js
   var _cartname = [`game.p8`];

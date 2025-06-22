@@ -104,6 +104,25 @@ def decompress(compressed_data, decompressed_len):
     
     return bytes(output)
 
+def format_gfx(gfx_bytes):
+    gfx_lines = []
+    for y in range(128):  # 128 rows
+        row = []
+        for x in range(64):  # 64 bytes * 2 pixels = 128 pixels
+            byte = gfx_bytes[y * 64 + x]
+            lo = byte & 0x0F
+            hi = (byte >> 4) & 0x0F
+            row.append(f"{lo:X}{hi:X}")
+        gfx_lines.append(''.join(row))
+    return '\n'.join(gfx_lines)
+
+def format_map(map_bytes):
+    map_lines = []
+    for i in range(0, len(map_bytes), 128):  # 128 tiles por fila
+        row_bytes = map_bytes[i:i+128]
+        map_lines.append(''.join(f"{b:02x}" for b in row_bytes))
+    return '\n'.join(map_lines)
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python js2p8.py <game.js>")
@@ -130,13 +149,18 @@ def main():
         array_str = match.group(1)
 
         try:
-            # 3. Convert JS string to Python list
             cartdat_list = json.loads(array_str)
 
-            # 4. Convert list of integers to bytes object
+
             cartdat_bytes = bytes(cartdat_list)
 
-            # 5. Read data according to specifications
+            gfx_data   = cartdat_bytes[0x0000:0x2000]
+            map_lower  = cartdat_bytes[0x1000:0x2000]
+            map_upper  = cartdat_bytes[0x2000:0x3000]
+            map_data   = map_upper + map_lower
+            flags_data = cartdat_bytes[0x3000:0x3100]
+            sfx_data   = cartdat_bytes[0x3200:0x4300]
+
             signature = cartdat_bytes[0x4300:0x4304]
             decompressed_len = int.from_bytes(cartdat_bytes[0x4304:0x4306], byteorder='big')
             compressed_len_plus_8 = int.from_bytes(cartdat_bytes[0x4306:0x4308], byteorder='big')
@@ -146,7 +170,14 @@ def main():
 
             with open(cart_name, 'w', encoding='utf-8') as f:
                 f.write(HEADER)
-                f.write(decompressed_data.decode('utf-8', errors='replace'))
+                f.write(decompressed_data.decode('utf-8', errors='backslashreplace').replace(r'\x94', '⬆️').replace(r'\x83', '⬇️').replace(r'\x8b', '⬅️').replace(r'\x91', '➡️').replace(r'\x8e', '🅾️').replace(r'\x97', '❎'))
+
+
+                f.write("\n__gfx__\n")
+                f.write(format_gfx(gfx_data))
+
+                f.write("\n__map__\n")
+                f.write(format_map(map_data))
 
             print("Signature:", signature)
             print("Decompressed size:", decompressed_len)
