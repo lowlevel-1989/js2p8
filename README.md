@@ -1,10 +1,12 @@
 # js2p8
 
-## Description
-
 `js2p8` is a tool to convert Pico-8 games that have been compiled to JavaScript **back** into their original `.p8` format.
 
 When a Pico-8 game is compiled to JavaScript, the generated code includes specific variables containing the cartridge name and the compressed game data. This program reads those compressed data from the generated `.js` file, decompresses it, and reconstructs the original `.p8` file with the correct header so it can be reopened and edited in Pico-8.
+
+
+[!["Buy Me A Coffee"](coffee.png)](https://ko-fi.com/lowlevel1989)
+
 
 ---
 
