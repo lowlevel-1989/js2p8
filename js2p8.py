@@ -112,7 +112,7 @@ def format_gfx(gfx_bytes):
             byte = gfx_bytes[y * 64 + x]
             lo = byte & 0x0F
             hi = (byte >> 4) & 0x0F
-            row.append(f"{lo:X}{hi:X}")
+            row.append(f"{lo:x}{hi:x}")
         gfx_lines.append(''.join(row))
     return '\n'.join(gfx_lines)
 
