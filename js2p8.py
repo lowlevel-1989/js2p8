@@ -123,6 +123,33 @@ def format_map(map_bytes):
         map_lines.append(''.join(f"{b:02x}" for b in row_bytes))
     return '\n'.join(map_lines)
 
+def format_sfx(sfx_bytes):
+    lines = []
+    for i in range(64):  # 64 sfx entries
+        offset = i * 68
+        entry = sfx_bytes[offset:offset + 68]
+        notes = entry[:64]
+        editor_mode = entry[64]
+        note_duration = entry[65]
+        loop_start = entry[66]
+        loop_end = entry[67]
+
+        # Convert header
+        line = f"{editor_mode:02x}{note_duration:02x}{loop_start:02x}{loop_end:02x}"
+
+        # Convert notes (32 notes = 64 bytes, 5 nibbles per note = 160 nibbles = 40 bytes = 80 hex chars)
+        for j in range(0, 64, 2):
+            lsb = notes[j]
+            msb = notes[j + 1]
+            pitch = lsb & 0x3F
+            waveform = ((msb & 0x80) >> 4) | ((msb & 0x01) << 2) | ((lsb & 0xC0) >> 6)
+            volume = (msb >> 1) & 0x07
+            effect = (msb >> 4) & 0x07
+            line += f"{pitch:02x}{waveform:x}{volume:x}{effect:x}"
+
+        lines.append(line)
+    return '\n'.join(lines)
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python js2p8.py <game.js>")
@@ -158,7 +185,6 @@ def main():
             map_lower  = cartdat_bytes[0x1000:0x2000]
             map_upper  = cartdat_bytes[0x2000:0x3000]
             map_data   = map_upper + map_lower
-            flags_data = cartdat_bytes[0x3000:0x3100]
             sfx_data   = cartdat_bytes[0x3200:0x4300]
 
             signature = cartdat_bytes[0x4300:0x4304]
@@ -178,6 +204,10 @@ def main():
 
                 f.write("\n__map__\n")
                 f.write(format_map(map_data))
+
+                f.write("\n__sfx__\n")
+                f.write(format_sfx(sfx_data))
+
 
             print("Signature:", signature)
             print("Decompressed size:", decompressed_len)
