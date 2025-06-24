@@ -150,6 +150,15 @@ def format_sfx(sfx_bytes):
         lines.append(line)
     return '\n'.join(lines)
 
+def format_gff(gff_bytes):
+    """Formatea 256 bytes de datos gff en 2 líneas hexadecimales (128 bytes por línea)."""
+    lines = []
+    for i in range(0, 256, 128):  # Procesar en chunks de 128 bytes
+        chunk = gff_bytes[i:i+128]
+        hex_line = ''.join(f"{b:02x}" for b in chunk)
+        lines.append(hex_line)
+    return '\n'.join(lines)
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python js2p8.py <game.js>")
@@ -185,6 +194,7 @@ def main():
             map_lower  = cartdat_bytes[0x1000:0x2000]
             map_upper  = cartdat_bytes[0x2000:0x3000]
             map_data   = map_upper + map_lower
+            gff_data   = cartdat_bytes[0x3000:0x3100]
             sfx_data   = cartdat_bytes[0x3200:0x4300]
 
             signature = cartdat_bytes[0x4300:0x4304]
@@ -204,6 +214,9 @@ def main():
 
                 f.write("\n__map__\n")
                 f.write(format_map(map_data))
+
+                f.write("\n__gff__\n")  # Nueva sección
+                f.write(format_gff(gff_data))
 
                 f.write("\n__sfx__\n")
                 f.write(format_sfx(sfx_data))
