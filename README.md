@@ -18,7 +18,7 @@ Currently, `js2p8` only supports the following sections of the `.p8` file:
 * `__sfx__`
 * `__gff__`
 
-**Other sections such as** `__music__`, and others **are not yet supported.**
+**Other sections such as** `__music__`, and `__label__` **are not yet supported.**
 
 ---
 
